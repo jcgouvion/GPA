@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Student Average</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <script src="http://code.jquery.com/jquery-1.2.1.min.js"></script>
+  <style>
+	#students-table {
+		border: 1px solid #000;
+		border-collapse: collapse;
+		width: 100%;
+	}
+	
+	#students-table th {
+		border-bottom: 1px solid #000;
+		border-collapse: collapse;
+	}
+	
+	#students-table td, #students-table th {
+		padding: 4px;
+	}
+  
+	.cell-name {
+		
+		text-align: left;
+	}
+	
+	.cell-grade {
+		text-align: right;
+	}
+	
+	#student_grade {
+		width: 50px;
+	}
+	
+	#layout-container {
+		margin: 0 auto;
+		width: 50%;
+		padding-top: 10px;
+	}
+  </style>
+</head>
+<body>
+ 
+<div id="layout-container">
+	<table id="students-table" class="table-striped">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th class="text-right">Grade</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody></tbody>
+		<tfoot>
+			<tr>
+				<td>
+					<input type="text" id="student_fname" placeholder="First Name" />
+					<input type="text" id="student_lname" placeholder="Last Name" />
+				</td>
+				<td class="text-right"><input type="text" id="student_grade" placeholder="Grade" />
+				</td>
+				<td class="text-right"><button id="add_new_student_btn" class="btn btn-success"> + </button>
+			</tr>
+		</tfoot>
+	</table>
+	<hr/>
+	Average: <span id="average"></span>
+</div>
+ 
+<button id="sort-btn" class="btn btn-info">Sort</button>
+ 
+<script>
+// Initial data to populate the table
+var initial_data = [
+	{
+		fName: 'Joe',
+		lName: 'Shmoe',
+		grade: 88
+	},
+	{
+		fName: 'Sam',
+		lName: 'Twoshoes',
+		grade: 74
+	},
+	{
+		fName: 'Karen',
+		lName: 'Grim',
+		grade: 96
+	},
+	{
+		fName: 'Frank',
+		lName: 'Frankie',
+		grade: 80
+	}
+]
+ 
+// Array that contains all students
+var students = []
+ 
+var tableBody;
+ 
+$(function() {
+	tableBody = $('#students-table tbody');
+	init();
+});
+ 
+// Populate the table with the initial student data by adding each item
+function init() {
+	for(var i = 0; i < initial_data.length; i++) {
+		var student = initial_data[i];
+		add_new_student(student['fName'], student['lName'], student['grade']);
+	}
+	
+	$('#add_new_student_btn').click(function() {
+		var fName = $('#student_fname').val();
+		var lName = $('#student_lname').val();
+		var grade = $('#student_grade').val();
+		
+		add_new_student(fName, lName, grade);
+		sort_students();
+	});
+	
+	$('#sort-btn').click(sort_students);
+}
+ 
+function sort_students() {
+		var sorted_students = students.sort(function(a, b) {
+			return b.fName < a.fName;
+		});
+		
+		students = [];
+		tableBody.html('');
+		sorted_students.forEach(function(student){
+			add_new_student(student.fName, student.lName, student.grade);
+		});
+		
+	}
+ 
+function remove_student(ele) {
+	var current_row = $(ele).parent().parent();
+	var index = tableBody.find('tr').index(current_row[0]);
+	
+	// Remove data from student array with the given index
+	students.splice(index, 1);
+	
+	current_row.remove();
+ 
+	console.log(students);
+	
+	// Calculate the average
+	calculate_average();
+}
+ 
+function add_new_student(firstName, lastName, grade) {
+	students.push({
+		'fName': firstName,
+		'lName': lastName,
+		'grade': parseFloat(grade)
+	});
+	
+	var del_btn = $('<button>').addClass('btn btn-danger').attr('onclick', 'remove_student(this)').html('X');
+	var cols = [
+		$('<td>').addClass('cell-name').html(firstName + ' ' + lastName),
+		$('<td>').addClass('cell-grade').html(grade),
+		$('<td>').addClass('cell-grade').html(del_btn)
+	]
+	
+	var row = $('<tr>');
+	cols.forEach(function(col) {
+		row.append(col);
+	});
+	
+	tableBody.append(row);
+	
+	calculate_average();
+}
+ 
+// Calculate the average and display it in span#average
+function calculate_average() {
+	var average = 0;
+	var sum = 0;
+	
+	students.forEach(function(student) {
+		sum += student.grade;
+	});
+	
+	average = sum / students.length;
+	$('#average').html(average);
+}
+ 
+</script>
+</body>
+</html>
